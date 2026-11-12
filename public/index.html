@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise ERP & Sales Management System</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eef2f7; padding-bottom: 15px; margin-bottom: 25px; }
+        h1 { color: #1e293b; margin: 0; font-size: 24px; }
+        .auth-box { max-width: 400px; margin: 80px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .hidden { display: none !important; }
+        .section { margin-bottom: 35px; background: #fafbfc; padding: 20px; border: 1px solid #e2e8f0; border-radius: 6px; }
+        .section h3 { margin-top: 0; color: #334155; }
+        form { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; align-items: end; }
+        .form-group { display: flex; flex-direction: column; }
+        label { font-size: 11px; font-weight: bold; margin-bottom: 5px; color: #64748b; text-transform: uppercase; }
+        input, select { padding: 9px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 14px; background: white; }
+        button { background-color: #2563eb; color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        button:hover { background-color: #1d4ed8; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        th, td { border: 1px solid #e2e8f0; padding: 11px; text-align: left; font-size: 13px; }
+        th { background-color: #1e293b; color: white; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        .badge-admin { background: #dc2626; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .badge-employee { background: #0284c7; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .btn-in { background-color: #16a34a; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-out { background-color: #ea580c; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .logout-btn { background-color: #64748b; padding: 6px 12px; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="auth-box">
+        <h2>🔐 ERP System Login</h2>
+        <p style="font-size: 13px; color: #64748b;">Default Admin: <strong>AdminBoss</strong> / <strong>123456</strong><br>Default Employee: <strong>SalesEmployee</strong> / <strong>123456</strong></p>
+        <form id="loginForm" style="display:flex; flex-direction:column; gap:15px; margin-top:15px;">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="loginUser" required placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPass" required placeholder="Enter password">
+            </div>
+            <button type="submit">Authenticate & Login</button>
+        </form>
+    </div>
+
+    <!-- MAIN ERP DASHBOARD -->
+    <div id="erpDashboard" class="container hidden">
+        <header>
+            <div>
+                <h1>🏢 Enterprise ERP & Sales Dashboard</h1>
+                <p id="sessionInfo" style="margin: 5px 0 0 0; font-size: 13px; color: #64748b;"></p>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </header>
+
+        <!-- Admin Product Registration Section -->
+        <div class="section" id="adminSection">
+            <h3>📦 Register New Inventory Item <span class="badge-admin">Admin Only</span></h3>
+            <form id="addItemForm">
+                <div class="form-group"><label>SKU Code</label><input type="text" id="sku" required placeholder="SKU-001"></div>
+                <div class="form-group"><label>Product Name</label><input type="text" id="name" required placeholder="Item description"></div>
+                <div class="form-group"><label>Initial Quantity</label><input type="number" id="quantity" required value="0"></div>
+                <div class="form-group"><label>Unit Price (KES)</label><input type="number" step="0.01" id="unit_price" required placeholder="0.00"></div>
+                <div class="form-group"><label>Storage Location</label><input type="text" id="location" required placeholder="Warehouse Zone A"></div>
+                <button type="submit">Save Product</button>
+            </form>
+        </div>
+
+        <!-- Live Inventory Table -->
+        <div class="section">
+            <h3>📋 Live Stock Inventory & Operations</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Product Name</th>
+                        <th>In Stock</th>
+                        <th>Unit Price (KES)</th>
+                        <th>Total Value (KES)</th>
+                        <th>Location</th>
+                        <th>Execute Action</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryTableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Comprehensive Audit & Accountability Report -->
+        <div class="section">
+            <h3>📊 Master Accountability Report: Who Sold What & When</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Staff Member</th>
+                        <th>Operation Type</th>
+                        <th>SKU</th>
+                        <th>Product Name</th>
+                        <th>Quantity Sold/Moved</th>
+                        <th>Total Transaction Value (KES)</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let currentSession = null;
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUser').value;
+            const password = document.getElementById('loginPass').value;
+
+            try {
+                const res = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    currentSession = data;
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('erpDashboard').classList.remove('hidden');
+                    
+                    const roleBadge = currentSession.role === 'ADMIN' ? '<span class="badge-admin">ADMINISTRATOR</span>' : '<span class="badge-employee">SALES EMPLOYEE</span>';
+                    document.getElementById('sessionInfo').innerHTML = `Logged in as: <strong>${currentSession.username}</strong> ${roleBadge}`;
+                    
+                    if (currentSession.role !== 'ADMIN') {
+                        document.getElementById('adminSection').classList.add('hidden');
+                    }
+
+                    loadDashboardData();
+                } else {
+                    alert(data.error);
+                }
+            } catch (err) {
+                alert('Server connection error.');
+            }
+        });
+
+        function logout() {
+            currentSession = null;
+            document.getElementById('erpDashboard').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('loginForm').reset();
+        }
+
+        async function loadDashboardData() {
+            await fetchInventory();
+            await fetchReport();
+        }
+
+        async function fetchInventory() {
+            const res = await fetch(`${API_URL}/inventory`);
+            const items = await res.json();
+            const tbody = document.getElementById('inventoryTableBody');
+            tbody.innerHTML = '';
+
+            if (items.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#64748b;">No items registered in the system.</td></tr>`;
+                return;
+            }
+
+            items.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.sku}</td>
+                    <td>${item.name}</td>
+                    <td><strong>${item.quantity}</strong></td>
+                    <td>KES ${Number(item.unit_price).toLocaleString()}</td>
+                    <td>KES ${Number(item.total_value).toLocaleString()}</td>
+                    <td>${item.location}</td>
+                    <td>
+                        <button class="btn-in" onclick="adjustStock('${item.sku}', 'IN')">+ Restock</button>
+                        <button class="btn-out" onclick="adjustStock('${item.sku}', 'OUT')">- Sell / Dispatch</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function fetchReport() {
+            const res = await fetch(`${API_URL}/reports/sales`);
+            const logs = await res.json();
+            const tbody = document.getElementById('reportTableBody');
+            tbody.innerHTML = '';
+
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#64748b;">No sales or stock movements recorded yet.</td></tr>`;
+                return;
+            }
+
+            logs.forEach(log => {
+                const row = document.createElement('tr');
+                const actionBadge = log.action_type === 'IN' 
+                    ? '<span style="color:green; font-weight:bold;">RESTOCK (+IN)</span>' 
+                    : '<span style="color:#ea580c; font-weight:bold;">SALE / DISPATCH (-OUT)</span>';
+                
+                row.innerHTML = `
+                    <td>${new Date(log.timestamp).toLocaleString()}</td>
+                    <td><strong>${log.performed_by}</strong></td>
+                    <td>${actionBadge}</td>
+                    <td>${log.sku}</td>
+                    <td>${log.product_name}</td>
+                    <td>${log.quantity_changed}</td>
+                    <td>KES ${Number(log.total_sale_value).toLocaleString()}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        document.getElementById('addItemForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                sku: document.getElementById('sku').value,
+                name: document.getElementById('name').value,
+                quantity: parseInt(document.getElementById('quantity').value),
+                unit_price: parseFloat(document.getElementById('unit_price').value),
+                location: document.getElementById('location').value
+            };
+
+            const res = await fetch(`${API_URL}/inventory`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                document.getElementById('addItemForm').reset();
+                loadDashboardData();
+            } else {
+                const err = await res.json();
+                alert('Error: ' + err.error);
+            }
+        });
+
+        async function adjustStock(sku, actionType) {
+            const title = actionType === 'IN' ? 'Enter quantity to restock:' : 'Enter quantity to sell/dispatch (OUT):';
+            const qtyStr = prompt(title);
+            if (!qtyStr) return;
+            const quantity = parseInt(qtyStr);
+            if (isNaN(quantity) || quantity <= 0) {
+                alert('Please enter a valid positive quantity.');
+                return;
+            }
+
+            const res = await fetch(`${API_URL}/movement`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sku, action_type: actionType, quantity, performed_by: currentSession.username })
+            });
+
+            if (res.ok) {
+                loadDashboardData();
+            } else {
+                const err = await res.json();
+                alert('Error: ' + err.error);
+            }
+        }
+    </script>
+</body>
+</html>
